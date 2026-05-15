@@ -2,7 +2,6 @@ function describeEffects(effects = {}) {
   const parts = [];
   if (effects.health) parts.push('Health changes');
   if (effects.humanity) parts.push('Humanity changes');
-  if (effects.exposure) parts.push('Exposure changes');
   return parts.join(' · ');
 }
 

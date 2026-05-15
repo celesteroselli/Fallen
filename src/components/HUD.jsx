@@ -1,8 +1,8 @@
-function StatBar({ label, value, max = 10, tone }) {
+function StatBar({ label, value, max = 10, tone, isChanging }) {
   const percent = Math.max(0, Math.min(100, (value / max) * 100));
 
   return (
-    <div className="barBlock">
+    <div className={`barBlock ${isChanging ? 'barChanged' : ''}`}>
       <div className="statLabel">
         <span>{label}</span>
         <strong>{value}/{max}</strong>
@@ -14,16 +14,26 @@ function StatBar({ label, value, max = 10, tone }) {
   );
 }
 
-export default function HUD({ health, humanity, exposure, objectives, showObjectives }) {
+export default function HUD({ health, humanity, feedback, objectives, showObjectives }) {
   return (
     <aside className="hud" aria-label="Player status">
       <div className="hudHeader">
         <span>Creature</span>
       </div>
 
-      <StatBar label="Humanity" value={humanity} tone="humanityFill" />
-      <StatBar label="Exposure" value={exposure} tone="exposureFill" />
-      <StatBar label="Health" value={health} max={20} tone="healthFill" />
+      <StatBar
+        label="Humanity"
+        value={humanity}
+        tone="humanityFill"
+        isChanging={feedback?.type === 'humanity'}
+      />
+      <StatBar
+        label="Health"
+        value={health}
+        max={20}
+        tone="healthFill"
+        isChanging={feedback?.type === 'health'}
+      />
 
       {showObjectives && (
         <section>

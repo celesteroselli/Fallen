@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { scenes } from './gameData.js';
 import Scene3D from './components/Scene3D.jsx';
 import HUD from './components/HUD.jsx';
@@ -8,7 +8,6 @@ import ChoicePanel from './components/ChoicePanel.jsx';
 const initialStats = {
   health: 20,
   humanity: 0,
-  exposure: 0,
   flags: {},
   objectives: []
 };
@@ -44,7 +43,6 @@ function applyEffects(stats, effects = {}) {
   return {
     health: clamp(stats.health + resolveEffectValue(effects.health, stats), 0, 20),
     humanity: clamp(stats.humanity + resolveEffectValue(effects.humanity, stats), 0, 10),
-    exposure: clamp(stats.exposure + resolveEffectValue(effects.exposure, stats), 0, 10),
     flags: nextFlags,
     objectives: nextObjectives
   };
@@ -59,15 +57,19 @@ export default function App() {
   const [nearbyObjectInfo, setNearbyObjectInfo] = useState(null);
   const [appliedSceneEffects, setAppliedSceneEffects] = useState({});
   const [appliedAutoEffects, setAppliedAutoEffects] = useState({});
+  const [statFeedback, setStatFeedback] = useState(null);
+  const [shameInteraction, setShameInteraction] = useState(null);
+  const previousStats = useRef(initialStats);
 
   const currentScene = scenes[currentSceneIndex];
   const sceneObjects = currentScene.objects || [];
+  const isLiteraryScene = currentScene.presentation === 'literary';
   const nearbyObject = useMemo(() => {
     if (!nearbyObjectInfo) return null;
     return sceneObjects.find((object) => object.id === nearbyObjectInfo.id) || null;
   }, [sceneObjects, nearbyObjectInfo]);
 
-  const activeInteraction = currentScene.cutscene || nearbyObject;
+  const activeInteraction = shameInteraction || currentScene.cutscene || nearbyObject;
   const activeKey = activeInteraction
     ? interactionKey(currentScene.id, activeInteraction.id)
     : null;
@@ -93,6 +95,34 @@ export default function App() {
   });
   const isLastScene = currentSceneIndex === scenes.length - 1;
   const healthDepleted = stats.health <= 0;
+  const worldBrightness = 0.62 + stats.humanity * 0.055;
+  const vignetteStrength = 0.76 - stats.humanity * 0.052;
+
+  useEffect(() => {
+    const previous = previousStats.current;
+
+    if (previous.humanity !== stats.humanity) {
+      setStatFeedback({
+        key: `${Date.now()}-humanity`,
+        type: 'humanity',
+        direction: stats.humanity > previous.humanity ? 'up' : 'down'
+      });
+    } else if (previous.health !== stats.health) {
+      setStatFeedback({
+        key: `${Date.now()}-health`,
+        type: 'health',
+        direction: stats.health > previous.health ? 'up' : 'down'
+      });
+    }
+
+    previousStats.current = stats;
+  }, [stats]);
+
+  useEffect(() => {
+    if (!statFeedback) return undefined;
+    const timeout = window.setTimeout(() => setStatFeedback(null), 950);
+    return () => window.clearTimeout(timeout);
+  }, [statFeedback]);
 
   useEffect(() => {
     if (appliedSceneEffects[currentScene.id]) return;
@@ -137,6 +167,10 @@ export default function App() {
       ...previous,
       [activeKey]: true
     }));
+
+    if (activeInteraction?.transient) {
+      setShameInteraction(null);
+    }
   }
 
   function handleChoice(choice) {
@@ -147,6 +181,39 @@ export default function App() {
       ...previous,
       [activeKey]: [...(previous[activeKey] || []), choice.id]
     }));
+  }
+
+  function handleShadowGaze({ damage }) {
+    if (currentScene.id !== 'town') return;
+
+    if (!stats.flags.shameRealized) {
+      setShameInteraction({
+        id: 'shame-realization',
+        label: 'Human Shadows',
+        speaker: 'Inner Voice',
+        transient: true,
+        script: [
+          {
+            speaker: 'Inner Voice',
+            role: 'inner',
+            text: 'Their silhouettes turn me into an object before they even see my face.'
+          },
+          {
+            speaker: 'Creature',
+            role: 'player',
+            text: 'This wound has a name. Shame. I have learned shame from the shape of human bodies.'
+          }
+        ],
+        choices: []
+      });
+    }
+
+    setStats((previous) =>
+      applyEffects(previous, {
+        health: -damage,
+        flags: previous.flags.shameRealized ? {} : { shameRealized: true }
+      })
+    );
   }
 
   function handleContinue() {
@@ -167,12 +234,24 @@ export default function App() {
   }
 
   return (
-    <main className="appShell">
-      <Scene3D
-        scene={currentScene}
-        nearbyObjectId={nearbyObject?.id}
-        onNearbyObjectChange={setNearbyObjectInfo}
-      />
+    <main
+      className={`appShell ${statFeedback ? `feedback-${statFeedback.type}-${statFeedback.direction}` : ''}`}
+      style={{
+        '--world-brightness': worldBrightness,
+        '--vignette-strength': vignetteStrength
+      }}
+    >
+      {isLiteraryScene ? (
+        <div className="literaryBackdrop" aria-hidden="true" />
+      ) : (
+        <Scene3D
+          scene={currentScene}
+          nearbyObjectId={nearbyObject?.id}
+          onNearbyObjectChange={setNearbyObjectInfo}
+          humanity={stats.humanity}
+          onShadowGaze={handleShadowGaze}
+        />
+      )}
 
       <div className="topBar">
         <div>
@@ -184,10 +263,14 @@ export default function App() {
       <HUD
         health={stats.health}
         humanity={stats.humanity}
-        exposure={stats.exposure}
+        feedback={statFeedback}
         objectives={stats.objectives}
         showObjectives={currentSceneIndex > 0}
       />
+
+      {statFeedback && (
+        <div key={statFeedback.key} className={`screenPulse ${statFeedback.type} ${statFeedback.direction}`} />
+      )}
 
       {!activeInteraction && (
         <div className="proximityPrompt">
@@ -196,7 +279,7 @@ export default function App() {
       )}
 
       {activeInteraction && activeTurn && (
-        <div className="bottomDock">
+        <div className={isLiteraryScene ? 'literaryDock' : 'bottomDock'}>
           <DialogBox
             interaction={activeInteraction}
             turn={{

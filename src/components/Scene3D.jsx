@@ -6,10 +6,12 @@ import {
   OrbitControls,
   Stars,
   Text,
+  useGLTF,
+  useTexture,
   useKeyboardControls,
   KeyboardControls
 } from '@react-three/drei';
-import { Suspense, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 const controlsMap = [
@@ -95,15 +97,70 @@ function ProximityTracker({ objects, onNearbyObjectChange }) {
   return null;
 }
 
+function ShadowPerson({ person }) {
+  const texture = useTexture(person.image);
+
+  return (
+    <Billboard position={person.position}>
+      <group scale={person.scale}>
+        <mesh position={[0, 0, -0.015]}>
+          <planeGeometry args={[0.86, 1.45]} />
+          <meshBasicMaterial color="#524653" transparent opacity={0.18} depthWrite={false} />
+        </mesh>
+        <mesh>
+          <planeGeometry args={[0.78, 1.38]} />
+          <meshBasicMaterial
+            map={texture}
+            transparent
+            opacity={0.72}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      </group>
+    </Billboard>
+  );
+}
+
+function ShadowGazeWatcher({ shadowPeople, humanity, onShadowGaze }) {
+  const { camera } = useThree();
+  const direction = useMemo(() => new THREE.Vector3(), []);
+  const toShadow = useMemo(() => new THREE.Vector3(), []);
+  const lastHitTime = useRef(0);
+
+  useFrame((state) => {
+    if (!shadowPeople.length || !onShadowGaze) return;
+
+    camera.getWorldDirection(direction);
+    direction.normalize();
+
+    const isLooking = shadowPeople.some((person) => {
+      toShadow.set(
+        person.position[0] - camera.position.x,
+        person.position[1] - camera.position.y,
+        person.position[2] - camera.position.z
+      );
+      const distance = toShadow.length();
+      if (distance > 9) return false;
+
+      toShadow.normalize();
+      return direction.dot(toShadow) > 0.955;
+    });
+
+    if (!isLooking || state.clock.elapsedTime - lastHitTime.current < 1.35) return;
+
+    lastHitTime.current = state.clock.elapsedTime;
+    onShadowGaze({
+      damage: Math.max(1, Math.ceil((humanity + 1) / 3))
+    });
+  });
+
+  return null;
+}
+
 function ClickableObject({ object, accent, isNearby }) {
   const [hovered, setHovered] = useState(false);
   const ref = useRef();
-
-  useFrame((state) => {
-    if (!ref.current) return;
-    ref.current.rotation.y += hovered ? 0.018 : 0.006;
-    ref.current.position.y += Math.sin(state.clock.elapsedTime * 2 + object.position[0]) * 0.0015;
-  });
 
   const materialColor = hovered || isNearby ? '#f7d48a' : accent;
 
@@ -111,18 +168,6 @@ function ClickableObject({ object, accent, isNearby }) {
     <group position={object.position}>
       <group
         ref={ref}
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerOver={(event) => {
-          event.stopPropagation();
-          setHovered(true);
-          document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          setHovered(false);
-          document.body.style.cursor = 'default';
-        }}
       >
         <ObjectMesh kind={object.kind} color={materialColor} />
       </group>
@@ -185,22 +230,7 @@ function ObjectMesh({ kind, color }) {
   }
 
   if (kind === 'house') {
-    return (
-      <group>
-        <mesh castShadow position={[0, 0.45, 0]}>
-          <boxGeometry args={[1.7, 0.9, 1.35]} />
-          <meshStandardMaterial color="#3a2b25" roughness={0.9} />
-        </mesh>
-        <mesh castShadow position={[0, 1.15, 0]} rotation-z={Math.PI / 4}>
-          <boxGeometry args={[1.45, 1.45, 1.4]} />
-          <meshStandardMaterial color={color} roughness={0.86} />
-        </mesh>
-        <mesh position={[0.52, 0.55, -0.7]}>
-          <boxGeometry args={[0.36, 0.28, 0.04]} />
-          <meshStandardMaterial color="#ffd98f" emissive="#ffb35d" emissiveIntensity={0.45} />
-        </mesh>
-      </group>
-    );
+    return <CottageModel color={color} />;
   }
 
   if (kind === 'clerval') {
@@ -325,7 +355,51 @@ function ObjectMesh({ kind, color }) {
   );
 }
 
-function ForestSet({ accent }) {
+function PineTree({ position, scale, rotationY }) {
+  const { scene } = useGLTF('/models/pine_tree.glb');
+  const tree = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    tree.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [tree]);
+
+  return (
+    <primitive
+      object={tree}
+      position={position}
+      rotation={[0, rotationY, 0]}
+      scale={[scale, scale, scale]}
+    />
+  );
+}
+
+function CottageModel({ color }) {
+  const { scene } = useGLTF('/models/CozyMedievalCottage.glb');
+  const cottage = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    cottage.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [cottage]);
+
+  return (
+    <group scale={[1.7, 1.7, 1.7]} rotation={[0, Math.PI, 0]}>
+      <primitive object={cottage} />
+      <pointLight position={[0.65, 0.75, -0.55]} color={color} intensity={0.8} distance={2.5} />
+    </group>
+  );
+}
+
+function ForestSet() {
   return (
     <group>
       {Array.from({ length: 22 }).map((_, index) => {
@@ -333,19 +407,15 @@ function ForestSet({ accent }) {
         const radius = 5 + (index % 5) * 0.8;
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
-        const scale = 0.8 + (index % 4) * 0.18;
+        const scale = 0.42 + (index % 4) * 0.05;
 
         return (
-          <group key={index} position={[x, 0, z]} scale={scale}>
-            <mesh castShadow position={[0, 0.8, 0]}>
-              <cylinderGeometry args={[0.12, 0.18, 1.6, 7]} />
-              <meshStandardMaterial color="#2e2018" />
-            </mesh>
-            <mesh castShadow position={[0, 1.8, 0]}>
-              <coneGeometry args={[0.7, 1.8, 8]} />
-              <meshStandardMaterial color={index % 3 === 0 ? accent : '#243f25'} roughness={0.9} />
-            </mesh>
-          </group>
+          <PineTree
+            key={index}
+            position={[x, 0, z]}
+            rotationY={-angle + (index % 3) * 0.42}
+            scale={scale}
+          />
         );
       })}
     </group>
@@ -448,15 +518,27 @@ function ChamberSet({ accent }) {
 }
 
 function EnvironmentSet({ type, accent }) {
-  if (type === 'forest') return <ForestSet accent={accent} />;
+  if (type === 'forest') return <ForestSet />;
   if (type === 'cave') return <CaveSet accent={accent} />;
   if (type === 'village') return <VillageSet accent={accent} />;
   if (type === 'library') return <LibrarySet accent={accent} />;
   return <ChamberSet accent={accent} />;
 }
 
-function SceneWorld({ scene, nearbyObjectId, onNearbyObjectChange }) {
-  const { environment, objects } = scene;
+useGLTF.preload('/models/pine_tree.glb');
+useGLTF.preload('/models/CozyMedievalCottage.glb');
+useTexture.preload('/images/shadow-person-1.png');
+useTexture.preload('/images/shadow-person-2.png');
+useTexture.preload('/images/shadow-person-3.png');
+
+function SceneWorld({
+  scene,
+  nearbyObjectId,
+  onNearbyObjectChange,
+  humanity,
+  onShadowGaze
+}) {
+  const { environment, objects, shadowPeople = [] } = scene;
 
   return (
     <>
@@ -476,14 +558,28 @@ function SceneWorld({ scene, nearbyObjectId, onNearbyObjectChange }) {
           isNearby={object.id === nearbyObjectId}
         />
       ))}
+      {shadowPeople.map((person) => (
+        <ShadowPerson key={person.id} person={person} />
+      ))}
       <PlayerMovement />
       <ProximityTracker objects={objects || []} onNearbyObjectChange={onNearbyObjectChange} />
+      <ShadowGazeWatcher
+        shadowPeople={shadowPeople}
+        humanity={humanity}
+        onShadowGaze={onShadowGaze}
+      />
       <OrbitControls enableDamping dampingFactor={0.08} maxPolarAngle={Math.PI / 2.05} />
     </>
   );
 }
 
-export default function Scene3D({ scene, nearbyObjectId, onNearbyObjectChange }) {
+export default function Scene3D({
+  scene,
+  nearbyObjectId,
+  onNearbyObjectChange,
+  humanity,
+  onShadowGaze
+}) {
   return (
     <div className="sceneCanvas">
       <KeyboardControls map={controlsMap}>
@@ -493,6 +589,8 @@ export default function Scene3D({ scene, nearbyObjectId, onNearbyObjectChange })
               scene={scene}
               nearbyObjectId={nearbyObjectId}
               onNearbyObjectChange={onNearbyObjectChange}
+              humanity={humanity}
+              onShadowGaze={onShadowGaze}
             />
           </Suspense>
         </Canvas>

@@ -33,6 +33,27 @@ button {
   overflow: hidden;
 }
 
+.literaryBackdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(245, 230, 198, 0.12), transparent 34%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.66), transparent 26%, transparent 74%, rgba(0, 0, 0, 0.7)),
+    linear-gradient(180deg, #0b0b0d 0%, #15130f 46%, #09090a 100%);
+}
+
+.literaryBackdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(rgba(255, 244, 219, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 244, 219, 0.025) 1px, transparent 1px);
+  background-size: 100% 28px, 34px 100%;
+  mask-image: radial-gradient(circle at 50% 50%, black, transparent 72%);
+}
+
 .sceneCanvas {
   position: absolute;
   inset: 0;
@@ -40,6 +61,8 @@ button {
 
 .sceneCanvas canvas {
   display: block;
+  filter: brightness(var(--world-brightness, 0.5)) saturate(calc(0.72 + (var(--world-brightness, 0.5) * 0.32)));
+  transition: filter 520ms ease;
 }
 
 .sceneCanvas::after {
@@ -48,8 +71,18 @@ button {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 36%, transparent 0, rgba(7, 7, 7, 0.18) 42%, rgba(7, 7, 7, 0.72) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.58));
+    radial-gradient(
+      circle at 50% 38%,
+      rgba(0, 0, 0, 0) 0,
+      rgba(0, 0, 0, calc(var(--vignette-strength, 0.85) * 0.22)) 42%,
+      rgba(0, 0, 0, var(--vignette-strength, 0.85)) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, calc(var(--vignette-strength, 0.85) * 0.12)),
+      rgba(0, 0, 0, calc(var(--vignette-strength, 0.85) * 0.64))
+    );
+  transition: background 520ms ease;
 }
 
 .worldLabel {
@@ -162,6 +195,11 @@ button {
 
 .barBlock {
   margin-top: 16px;
+  border-radius: 7px;
+}
+
+.barChanged {
+  animation: statBarGlow 850ms ease;
 }
 
 .statLabel {
@@ -188,14 +226,12 @@ button {
 
 .humanityFill {
   background: linear-gradient(90deg, #b98f45, #e5c16f, #fff0bd);
-}
-
-.exposureFill {
-  background: linear-gradient(90deg, #333b8f, #7149b7, #b568d8);
+  box-shadow: 0 0 16px rgba(255, 229, 160, 0.35);
 }
 
 .healthFill {
   background: linear-gradient(90deg, #8f1f2d, #d74c42, #f0a85f);
+  box-shadow: 0 0 14px rgba(215, 76, 66, 0.32);
 }
 
 .hud section h2 {
@@ -243,6 +279,17 @@ button {
   align-items: end;
 }
 
+.literaryDock {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  z-index: 9;
+  display: grid;
+  width: min(780px, calc(100vw - 48px));
+  gap: 14px;
+  transform: translate(-50%, -50%);
+}
+
 .proximityPrompt {
   position: absolute;
   left: 50%;
@@ -263,6 +310,34 @@ button {
   backdrop-filter: blur(14px);
 }
 
+.screenPulse {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.screenPulse.humanity {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 230, 170, 0.24), transparent 42%),
+    radial-gradient(circle at 50% 50%, transparent 35%, rgba(255, 214, 126, 0.18) 100%);
+  animation: humanityPulse 900ms ease-out forwards;
+}
+
+.screenPulse.health.down {
+  background:
+    radial-gradient(circle at 50% 52%, transparent 48%, rgba(111, 8, 20, 0.42) 100%),
+    linear-gradient(180deg, rgba(146, 15, 28, 0.28), transparent 30%, rgba(146, 15, 28, 0.24));
+  animation: bleedPulse 900ms ease-out forwards;
+}
+
+.screenPulse.health.up {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 211, 127, 0.18), transparent 46%),
+    radial-gradient(circle at 50% 50%, transparent 48%, rgba(244, 154, 75, 0.14) 100%);
+  animation: healthGlowPulse 900ms ease-out forwards;
+}
+
 .dialogBox,
 .choicePanel {
   border: 1px solid rgba(237, 210, 156, 0.22);
@@ -277,12 +352,36 @@ button {
   padding: 18px;
 }
 
+.literaryDock .dialogBox,
+.literaryDock .choicePanel {
+  border: 1px solid rgba(95, 70, 40, 0.32);
+  background:
+    linear-gradient(180deg, rgba(244, 232, 203, 0.96), rgba(222, 202, 162, 0.94)),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.36), transparent 55%);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.38);
+  color: #23180f;
+  backdrop-filter: none;
+}
+
+.literaryDock .dialogBox {
+  min-height: 270px;
+  padding: 34px 38px 30px;
+}
+
 .sceneKicker {
   color: #d9b66d;
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+.literaryDock .sceneKicker {
+  color: #6e4a28;
+  border-bottom: 1px solid rgba(83, 56, 31, 0.2);
+  padding-bottom: 10px;
 }
 
 .dialogBox h1 {
@@ -293,12 +392,26 @@ button {
   line-height: 1.1;
 }
 
+.literaryDock .dialogBox h1 {
+  color: #24170e;
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 600;
+}
+
 .dialogBox p {
   max-width: 72ch;
   margin: 0 0 18px;
   color: #eadfc9;
   font-size: 17px;
   line-height: 1.55;
+}
+
+.literaryDock .dialogBox p {
+  color: #24170e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  line-height: 1.72;
 }
 
 .dialogBox.player {
@@ -327,15 +440,115 @@ button {
   text-transform: uppercase;
 }
 
+.literaryDock .spaceHint {
+  color: rgba(58, 38, 21, 0.58);
+}
+
+.literaryDock .typeCursor {
+  background: rgba(49, 31, 15, 0.7);
+}
+
 @keyframes cursorBlink {
   50% {
     opacity: 0;
   }
 }
 
+@keyframes statBarGlow {
+  0% {
+    box-shadow: 0 0 0 rgba(255, 231, 170, 0);
+    transform: scale(1);
+  }
+  45% {
+    box-shadow: 0 0 22px rgba(255, 231, 170, 0.42);
+    transform: scale(1.018);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(255, 231, 170, 0);
+    transform: scale(1);
+  }
+}
+
+@keyframes humanityPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes bleedPulse {
+  0% {
+    opacity: 0;
+    filter: saturate(1);
+  }
+  30% {
+    opacity: 1;
+    filter: saturate(1.35);
+  }
+  100% {
+    opacity: 0;
+    filter: saturate(1);
+  }
+}
+
+@keyframes healthGlowPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+}
+
 .choicePanel {
   min-height: 205px;
   padding: 14px;
+}
+
+.literaryDock .choicePanel {
+  min-height: 0;
+  padding: 18px;
+}
+
+.literaryDock .panelTitle h2,
+.literaryDock .panelTitle span {
+  color: #3a2615;
+}
+
+.literaryDock .choiceButton,
+.literaryDock .primaryButton {
+  border-color: rgba(72, 47, 25, 0.24);
+  background: rgba(77, 49, 25, 0.1);
+  color: #25170d;
+}
+
+.literaryDock .choiceButton:hover:not(:disabled),
+.literaryDock .primaryButton:hover {
+  border-color: rgba(74, 47, 23, 0.52);
+  background: rgba(93, 57, 25, 0.18);
+}
+
+.literaryDock .choiceButton small,
+.literaryDock .emptyText,
+.literaryDock .endingPanel p {
+  color: rgba(44, 29, 16, 0.68);
+}
+
+.literaryDock .primaryButton {
+  background: linear-gradient(180deg, rgba(78, 48, 24, 0.9), rgba(44, 28, 16, 0.94));
+  color: #f5e7c8;
 }
 
 .panelTitle h2 {
@@ -463,6 +676,15 @@ button {
   .bottomDock {
     grid-template-columns: 1fr;
     margin: 0 16px 18px;
+  }
+
+  .literaryDock {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    transform: none;
+    margin: 92px 16px 18px;
   }
 
   .proximityPrompt {

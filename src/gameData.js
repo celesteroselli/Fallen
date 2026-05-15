@@ -60,7 +60,7 @@ export const scenes = [
         id: 'delacey-house',
         label: 'The House',
         kind: 'house',
-        position: [0.4, 0.55, -2.7],
+        position: [0, 1, -2.5],
         prompt: 'Approach the cottage',
         speaker: 'The Cottage',
         script: [
@@ -111,7 +111,7 @@ export const scenes = [
         id: 'paradise-lost',
         label: 'Paradise Lost',
         kind: 'book',
-        position: [-2.7, 0.7, 0.8],
+        position: [-2.7, 0.1, 0.8],
         prompt: 'Approach the book',
         speaker: 'Book',
         script: [
@@ -143,7 +143,7 @@ export const scenes = [
         id: 'werther',
         label: 'Werther',
         kind: 'book',
-        position: [2.6, 0.7, 0.9],
+        position: [2.6, 0.1, 0.9],
         prompt: 'Approach the book',
         speaker: 'Book',
         script: [
@@ -175,7 +175,7 @@ export const scenes = [
         id: 'plutarch',
         label: "Plutarch's Lives",
         kind: 'book',
-        position: [0.1, 0.7, 2.7],
+        position: [0.1, 0.1, 2.7],
         prompt: 'Approach the book',
         speaker: 'Book',
         script: [
@@ -210,6 +210,7 @@ export const scenes = [
   {
     id: 'mountain',
     title: 'The Mountain',
+    presentation: 'literary',
     environment: {
       type: 'cave',
       color: '#151820',
@@ -272,6 +273,32 @@ export const scenes = [
       health: ({ humanity }) => -Math.ceil(humanity / 4),
       flags: { enteredTown: true }
     },
+    shadowPeople: [
+      {
+        id: 'town-shadow-1',
+        image: '/images/shadow-person-1.png',
+        position: [-3.1, 1.05, -1.6],
+        scale: 1.95
+      },
+      {
+        id: 'town-shadow-2',
+        image: '/images/shadow-person-2.png',
+        position: [3.2, 1.0, -0.7],
+        scale: 1.75
+      },
+      {
+        id: 'town-shadow-3',
+        image: '/images/shadow-person-3.png',
+        position: [-1.5, 1.0, 3.0],
+        scale: 1.85
+      },
+      {
+        id: 'town-shadow-4',
+        image: '/images/shadow-person-1.png',
+        position: [2.1, 1.0, 3.4],
+        scale: 1.65
+      }
+    ],
     objects: [
       {
         id: 'clerval',
@@ -309,7 +336,6 @@ export const scenes = [
             effects: {
               humanity: -10,
               health: 3,
-              exposure: 2,
               flags: { murderedClerval: true },
               objectivesComplete: ['Endure the town', 'Decide Clerval’s fate']
             }
@@ -331,6 +357,7 @@ export const scenes = [
   {
     id: 'ocean',
     title: 'The Ocean',
+    presentation: 'literary',
     environment: {
       type: 'chamber',
       color: '#0e1720',
