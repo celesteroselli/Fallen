@@ -6,7 +6,7 @@ import DialogBox from './components/DialogBox.jsx';
 import ChoicePanel from './components/ChoicePanel.jsx';
 
 const initialStats = {
-  health: 20,
+  health: 30,
   humanity: 0,
   flags: {},
   objectives: []
@@ -41,14 +41,15 @@ function applyEffects(stats, effects = {}) {
   ]);
 
   return {
-    health: clamp(stats.health + resolveEffectValue(effects.health, stats), 0, 20),
-    humanity: clamp(stats.humanity + resolveEffectValue(effects.humanity, stats), 0, 10),
+    health: clamp(stats.health + resolveEffectValue(effects.health, stats), 0, 30),
+    humanity: clamp(stats.humanity + resolveEffectValue(effects.humanity, stats), 0, 100),
     flags: nextFlags,
     objectives: nextObjectives
   };
 }
 
 export default function App() {
+  const [hasIntroStarted, setHasIntroStarted] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [stats, setStats] = useState(initialStats);
   const [selectedByInteraction, setSelectedByInteraction] = useState({});
@@ -95,8 +96,22 @@ export default function App() {
   });
   const isLastScene = currentSceneIndex === scenes.length - 1;
   const healthDepleted = stats.health <= 0;
-  const worldBrightness = 0.62 + stats.humanity * 0.055;
-  const vignetteStrength = 0.76 - stats.humanity * 0.052;
+  const humanityRatio = stats.humanity / 100;
+  const worldBrightness = 0.62 + humanityRatio * 0.55;
+  const vignetteStrength = 0.76 - humanityRatio * 0.52;
+
+  useEffect(() => {
+    if (hasIntroStarted) return undefined;
+
+    function handleIntroStart(event) {
+      if (event.code !== 'Space') return;
+      event.preventDefault();
+      setHasIntroStarted(true);
+    }
+
+    window.addEventListener('keydown', handleIntroStart);
+    return () => window.removeEventListener('keydown', handleIntroStart);
+  }, [hasIntroStarted]);
 
   useEffect(() => {
     const previous = previousStats.current;
@@ -196,13 +211,8 @@ export default function App() {
           {
             speaker: 'Inner Voice',
             role: 'inner',
-            text: 'Their silhouettes turn me into an object before they even see my face.'
+            text: '“Was I then a monster, a blot upon the earth, from which all men fled, and whom all men disowned? (87)'
           },
-          {
-            speaker: 'Creature',
-            role: 'player',
-            text: 'This wound has a name. Shame. I have learned shame from the shape of human bodies.'
-          }
         ],
         choices: []
       });
@@ -233,9 +243,25 @@ export default function App() {
     setAppliedAutoEffects({});
   }
 
+  if (!hasIntroStarted) {
+    return (
+      <main className="introScreen">
+        <section className="introText" aria-label="Game introduction">
+          <blockquote>
+            “Remember that I am thy creature; I ought to be thy Adam, but I am rather the fallen angel, whom thou drivest from joy for no misdeed (72).”
+          </blockquote>
+          <p>
+            The more humanity you earn, the brighter the world becomes... but the easier it becomes to hurt.
+          </p>
+          <span>Press Space to begin</span>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main
-      className={`appShell ${statFeedback ? `feedback-${statFeedback.type}-${statFeedback.direction}` : ''}`}
+      className={`appShell appFadeIn ${statFeedback ? `feedback-${statFeedback.type}-${statFeedback.direction}` : ''}`}
       style={{
         '--world-brightness': worldBrightness,
         '--vignette-strength': vignetteStrength

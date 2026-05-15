@@ -77,7 +77,7 @@ export default function ChoicePanel({
       )}
 
       {choices.length === 0 && (
-        <p className="emptyText interactionHint">The moment has passed into you.</p>
+        <p className="emptyText interactionHint">This moment is over. Continue.</p>
       )}
 
       {sceneComplete && !isLastScene && (

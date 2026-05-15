@@ -9,23 +9,22 @@ export default function DialogBox({
   distance,
   onAdvance
 }) {
-  const shouldType = turn.role !== 'player';
   const fullText = turn.text;
-  const [visibleCount, setVisibleCount] = useState(shouldType ? 0 : fullText.length);
+  const [visibleCount, setVisibleCount] = useState(0);
 
   useEffect(() => {
-    setVisibleCount(shouldType ? 0 : fullText.length);
-  }, [fullText, shouldType]);
+    setVisibleCount(0);
+  }, [fullText]);
 
   useEffect(() => {
-    if (!shouldType || visibleCount >= fullText.length || scriptComplete) return undefined;
+    if (visibleCount >= fullText.length || scriptComplete) return undefined;
 
     const timeout = window.setTimeout(() => {
       setVisibleCount((count) => Math.min(count + 1, fullText.length));
     }, 24);
 
     return () => window.clearTimeout(timeout);
-  }, [fullText.length, scriptComplete, shouldType, visibleCount]);
+  }, [fullText.length, scriptComplete, visibleCount]);
 
   const visibleText = useMemo(
     () => fullText.slice(0, visibleCount),

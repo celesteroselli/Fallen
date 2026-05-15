@@ -24,13 +24,14 @@ export default function HUD({ health, humanity, feedback, objectives, showObject
       <StatBar
         label="Humanity"
         value={humanity}
+        max={100}
         tone="humanityFill"
         isChanging={feedback?.type === 'humanity'}
       />
       <StatBar
         label="Health"
         value={health}
-        max={20}
+        max={30}
         tone="healthFill"
         isChanging={feedback?.type === 'health'}
       />

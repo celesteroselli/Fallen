@@ -1,13 +1,20 @@
 :root {
   color-scheme: dark;
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: "Zeyada", cursive;
+  font-size: 30px;
   background: #070707;
   color: #f5ecd8;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+@font-face {
+  font-family: "Zeyada";
+  src: url("/fonts/Zeyada-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 * {
@@ -31,6 +38,58 @@ button {
   height: 100vh;
   background: #070707;
   overflow: hidden;
+}
+
+.appFadeIn {
+  animation: appFadeIn 900ms ease-out both;
+}
+
+.introScreen {
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(230, 211, 168, 0.09), transparent 34%),
+    linear-gradient(180deg, #070707, #11100e 48%, #050505);
+}
+
+.introText {
+  width: min(760px, 100%);
+  text-align: center;
+  animation: introTextIn 1100ms ease-out both;
+}
+
+.introText blockquote {
+  margin: 0;
+  padding-bottom: 20px;
+  color: #f8ecd1;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(20px, 5.8vw, 40px);
+  font-style: italic;
+  line-height: 1.16;
+  text-shadow: 0 12px 44px rgba(0, 0, 0, 0.75);
+}
+
+.introText p {
+  width: min(560px, 100%);
+  margin: 28px auto 0;
+  color: rgba(246, 229, 195, 0.78);
+  font-size: 30px;
+  line-height: 1.7;
+}
+
+.introText span {
+  display: inline-block;
+  margin-top: 26px;
+  color: #d9b66d;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  animation: introPulse 1500ms ease-in-out infinite;
 }
 
 .literaryBackdrop {
@@ -91,7 +150,7 @@ button {
   border-radius: 6px;
   background: rgba(11, 9, 8, 0.68);
   color: #f6e7c1;
-  font-size: 12px;
+  font-size: 24px;
   letter-spacing: 0;
   white-space: nowrap;
   text-transform: uppercase;
@@ -108,7 +167,7 @@ button {
   border-radius: 6px;
   background: rgba(8, 8, 10, 0.58);
   color: rgba(255, 246, 222, 0.8);
-  font-size: 12px;
+  font-size: 24px;
   backdrop-filter: blur(12px);
 }
 
@@ -137,7 +196,7 @@ button {
 
 .eyebrow {
   color: #d9b66d;
-  font-size: 12px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -151,7 +210,7 @@ button {
   border-radius: 6px;
   background: rgba(20, 15, 12, 0.72);
   color: #f8dc9d;
-  font-size: 12px;
+  font-size: 24px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -159,7 +218,7 @@ button {
 
 .hud {
   position: absolute;
-  top: 120px;
+  top: 140px;
   left: 24px;
   z-index: 8;
   width: min(290px, calc(100vw - 48px));
@@ -184,13 +243,13 @@ button {
 .hudHeader > span:first-child {
   color: #fff3d3;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 22px;
+  font-size: 36px;
   font-weight: 700;
 }
 
 .hudPip {
   padding: 5px 7px;
-  font-size: 9px;
+  font-size: 18px;
 }
 
 .barBlock {
@@ -204,7 +263,7 @@ button {
 
 .statLabel {
   color: #e5d1ae;
-  font-size: 12px;
+  font-size: 24px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -238,7 +297,7 @@ button {
   display: block;
   margin: 18px 0 5px;
   color: rgba(245, 232, 201, 0.72);
-  font-size: 11px;
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -258,13 +317,13 @@ button {
   border-radius: 6px;
   background: rgba(218, 177, 104, 0.1);
   color: #dfd5bd;
-  font-size: 12px;
+  font-size: 22px;
 }
 
 .emptyText {
   margin: 0 0 8px;
   color: rgba(245, 232, 201, 0.55);
-  font-size: 13px;
+  font-size: 24px;
 }
 
 .bottomDock {
@@ -302,7 +361,7 @@ button {
   border-radius: 8px;
   background: rgba(8, 8, 10, 0.62);
   color: rgba(255, 246, 222, 0.84);
-  font-size: 13px;
+  font-size: 24px;
   font-weight: 800;
   text-align: center;
   text-transform: uppercase;
@@ -372,7 +431,7 @@ button {
 
 .sceneKicker {
   color: #d9b66d;
-  font-size: 12px;
+  font-size: 24px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -403,7 +462,7 @@ button {
   max-width: 72ch;
   margin: 0 0 18px;
   color: #eadfc9;
-  font-size: 17px;
+  font-size: 32px;
   line-height: 1.55;
 }
 
@@ -434,7 +493,7 @@ button {
 
 .spaceHint {
   color: rgba(245, 232, 201, 0.58);
-  font-size: 12px;
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -512,6 +571,38 @@ button {
   }
 }
 
+@keyframes appFadeIn {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes introTextIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes introPulse {
+  0%,
+  100% {
+    opacity: 0.48;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .choicePanel {
   min-height: 205px;
   padding: 14px;
@@ -554,12 +645,12 @@ button {
 .panelTitle h2 {
   margin: 0;
   color: #fff1cf;
-  font-size: 15px;
+  font-size: 28px;
 }
 
 .panelTitle span {
   color: #d9b66d;
-  font-size: 12px;
+  font-size: 24px;
   font-weight: 800;
 }
 
@@ -604,14 +695,14 @@ button {
 }
 
 .choiceButton span {
-  font-size: 14px;
+  font-size: 28px;
   font-weight: 800;
 }
 
 .choiceButton small {
   min-height: 15px;
   color: rgba(245, 232, 201, 0.68);
-  font-size: 11px;
+  font-size: 22px;
 }
 
 .primaryButton {
@@ -716,6 +807,6 @@ button {
   }
 
   .dialogBox p {
-    font-size: 15px;
+    font-size: 28px;
   }
 }

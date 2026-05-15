@@ -25,7 +25,7 @@ export const scenes = [
         speaker: 'Inner Voice',
         autoEffects: {
           health: -2,
-          humanity: 2,
+          humanity: 5,
           flags: { discoveredFire: true }
         },
         script: [
@@ -65,18 +65,18 @@ export const scenes = [
         speaker: 'The Cottage',
         script: [
           {
-            speaker: 'Creature',
-            role: 'player',
+            speaker: 'Inner Voice',
+            role: 'inner',
             text: 'What chiefly struck me was the gentle manners of these people; and I longed to join them, but dared not (80).'
           },
           {
-            speaker: 'Creature',
-            role: 'player',
+            speaker: 'Inner Voice',
+            role: 'inner',
             text: 'I discovered also another means through which I was enabled to assist their labours. I found that the youth spent a great part of each day in collecting wood for the family fire, and during the night I often took his tools, the use of which I quickly discovered, and brought home firing sufficient for the consumption of several days (81).'
           },
           {
-            speaker: 'Creature',
-            role: 'player',
+            speaker: 'Inner Voice',
+            role: 'inner',
             text: 'I afterwards found that these labours, performed by an invisible hand, greatly astonished them; and once or twice I heard them, on these occasions, utter the words good spirit, wonderful; but I did not then understand the significance of these terms (83)'
           }
         ],
@@ -106,13 +106,13 @@ export const scenes = [
         id: 'paradise-lost',
         label: 'Paradise Lost',
         kind: 'book',
-        position: [-2.7, 0.1, 0.8],
+        position: [-2.7, -0.2, 0.8],
         prompt: 'Approach the book',
         speaker: 'Book',
         script: [
           {
-            speaker: 'Creature',
-            role: 'player',
+            speaker: 'Inner Voice',
+            role: 'inner',
             text: 'It moved every feeling of wonder and aw3, that the picture of an omnipotent God warring with his creatures was capable of exciting... Like Adam, I was created apparently united by no link to any other being in existence (94).'
           }
         ],
@@ -121,7 +121,7 @@ export const scenes = [
             id: 'read-paradise-lost',
             text: 'Read Paradise Lost',
             effects: {
-              humanity: 2,
+              humanity: 5,
               flags: { readParadiseLost: true }
             }
           },
@@ -138,13 +138,13 @@ export const scenes = [
         id: 'werther',
         label: 'Werther',
         kind: 'book',
-        position: [2.6, 0.1, 0.9],
+        position: [2.6, -0.2, 0.9],
         prompt: 'Approach the book',
         speaker: 'Book',
         script: [
           {
-            speaker: 'Creature',
-            role: 'player',
+            speaker: 'Inner Voice',
+            role: 'inner',
             text: '...besides the interest of its simple and affecting story, so many opinions are canvassed, and so many lights thrown upon what had hitherto been to me obscure subjects, that I found in it a never-ending source of speculation and astonishment (93).'
           }
         ],
@@ -153,7 +153,7 @@ export const scenes = [
             id: 'read-werther',
             text: 'Read The Sorrows of Young Werther',
             effects: {
-              humanity: 2,
+              humanity: 5,
               flags: { readWerther: true }
             }
           },
@@ -170,13 +170,13 @@ export const scenes = [
         id: 'plutarch',
         label: "Plutarch's Lives",
         kind: 'book',
-        position: [0.1, 0.1, 2.7],
+        position: [0.1, -0.2, 2.7],
         prompt: 'Approach the book',
         speaker: 'Book',
         script: [
           {
-            speaker: 'Creature',
-            role: 'player',
+            speaker: 'Inner Voice',
+            role: 'inner',
             text: 'This book had a far different effect upon me from the Sorrows of Werter... Plutarch taught me high thoughts; he elevated me above the wretched sphere of my own reflections, to admire and love the heroes of past ages (94).'
           }
         ],
@@ -185,7 +185,7 @@ export const scenes = [
             id: 'read-plutarch',
             text: "Read Plutarch's Lives",
             effects: {
-              humanity: 2,
+              humanity: 5,
               flags: { readPlutarch: true },
               objectivesComplete: ['Look at the books']
             }
@@ -258,9 +258,10 @@ export const scenes = [
     title: 'The Town',
     environment: {
       type: 'village',
-      color: '#261915',
-      fog: '#110c0a',
-      accent: '#c46b58',
+      color: '#100908',
+      fog: '#1e1515ff',
+      accent: '#7d1313',
+      ambientIntensity: 0.34,
       theme: 'human shadows'
     },
     objectives: ['Endure the town', 'Meet Clerval'],
@@ -272,26 +273,63 @@ export const scenes = [
       {
         id: 'town-shadow-1',
         image: '/images/shadow-person-1.png',
-        position: [-3.1, 1.05, -1.6],
+        position: [-3.1, 0.6, -1.6],
         scale: 1.95
       },
       {
         id: 'town-shadow-2',
         image: '/images/shadow-person-2.png',
-        position: [3.2, 1.0, -0.7],
+        position: [3.2, 0.6, -0.7],
         scale: 1.75
       },
       {
         id: 'town-shadow-3',
         image: '/images/shadow-person-3.png',
-        position: [-1.5, 1.0, 3.0],
+        position: [-1.5, 0.6, 3.0],
         scale: 1.85
       },
       {
         id: 'town-shadow-4',
         image: '/images/shadow-person-1.png',
-        position: [2.1, 1.0, 3.4],
+        position: [2.1, 0.6, 3.4],
         scale: 1.65
+      }
+    ],
+    backdropHouses: [
+      {
+        id: 'town-house-back-left',
+        position: [-3.7, 0, -3.2],
+        rotationY: 2.75,
+        scale: 0.28,
+        variant: 1
+      },
+      {
+        id: 'town-house-back-center',
+        position: [-0.2, 0, -3.7],
+        rotationY: Math.PI,
+        scale: 0.22,
+        variant: 3
+      },
+      {
+        id: 'town-house-back-right',
+        position: [3.7, 0, -3.1],
+        rotationY: 3.55,
+        scale: 0.28,
+        variant: 1
+      },
+      {
+        id: 'town-house-side-left',
+        position: [-5.0, 0, 0.4],
+        rotationY: 1.45,
+        scale: 0.22,
+        variant: 3
+      },
+      {
+        id: 'town-house-side-right',
+        position: [5.0, 0, 0.8],
+        rotationY: -1.35,
+        scale: 0.28,
+        variant: 1
       }
     ],
     objects: [
@@ -299,7 +337,7 @@ export const scenes = [
         id: 'clerval',
         label: 'Clerval',
         kind: 'clerval',
-        position: [0, 0.8, -2.6],
+        position: [0, -0.4, -2.6],
         prompt: 'Approach Clerval',
         speaker: 'Clerval',
         script: [
@@ -309,13 +347,13 @@ export const scenes = [
             text: 'Who is there?'
           },
           {
-            speaker: 'Creature',
-            role: 'player',
+            speaker: 'Inner Voice',
+            role: 'inner',
             text: 'For a long time, I could not conceive how one man could go forth to murder his fellow, or even why there were laws and governments (87).'
           },
           {
-            speaker: 'Creature',
-            role: 'player',
+            speaker: 'Inner Voice',
+            role: 'inner',
             text: 'My rage was without bounds; I sprang on him, impelled by all the feelings which can arm one being against the existence of another (72).'
           },
         ],
@@ -324,8 +362,8 @@ export const scenes = [
             id: 'murder-clerval',
             text: 'Murder Clerval',
             effects: {
-              humanity: -10,
-              health: 3,
+              humanity: -15,
+              health: 5,
               flags: { murderedClerval: true },
               objectivesComplete: ['Endure the town', 'Meet Clerval']
             }
@@ -334,8 +372,8 @@ export const scenes = [
             id: 'spare-clerval',
             text: 'Do not murder Clerval',
             effects: {
-              humanity: 3,
-              health: -2,
+              humanity: 15,
+              health: -5,
               flags: { sparedClerval: true },
               objectivesComplete: ['Endure the town', 'Meet Clerval']
             }
@@ -358,7 +396,7 @@ export const scenes = [
     objectives: ['Face Victor’s body', 'Choose your last act'],
     sceneStartEffects: {
       humanity: 10,
-      health: -10,
+      health: -5,
       flags: { sawVictorDead: true }
     },
     cutscene: {
@@ -374,7 +412,7 @@ export const scenes = [
         {
           speaker: 'Walton',
           role: 'partner',
-          text: 'He was soon borne away by tge waves, and lost in darkness and distance (168).'
+          text: 'He was soon borne away by the waves, and lost in darkness and distance (168).'
         },
         {
           speaker: 'Creature',
@@ -384,7 +422,7 @@ export const scenes = [
         {
           speaker: 'Creature',
           role: 'player',
-          text: 'Polluted by crimes, and torn by the bitterest remorse, where can I find rest but in death? (167). But... '
+          text: 'Polluted by crimes, and torn by the bitterest remorse, where can I find rest but in death? (167). But... Why did I live? Why, in that instant, did I not extinguish the spark of existence which you had so wantonly bestowed? I know not (99).'
         }
       ],
       choices: [

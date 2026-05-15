@@ -21,6 +21,9 @@ const controlsMap = [
   { name: 'right', keys: ['KeyD', 'ArrowRight'] }
 ];
 
+const assetPath = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
+const handwritingFont = assetPath('/fonts/Zeyada-Regular.ttf');
+
 function Ground({ color }) {
   return (
     <mesh rotation-x={-Math.PI / 2} receiveShadow>
@@ -106,21 +109,19 @@ function ShadowPerson({ person }) {
 }
 
 function ShadowFigure({ image, scale = 1, opacity = 0.72 }) {
-  const texture = useTexture(image);
+  const texture = useTexture(assetPath(image));
 
   return (
     <group scale={scale}>
-      <mesh position={[0, 0, -0.015]}>
-        <planeGeometry args={[0.86, 1.45]} />
-        <meshBasicMaterial color="#524653" transparent opacity={0.18} depthWrite={false} />
-      </mesh>
       <mesh>
         <planeGeometry args={[0.78, 1.38]} />
         <meshBasicMaterial
           map={texture}
           transparent
           opacity={opacity}
+          alphaTest={0.08}
           depthWrite={false}
+          side={THREE.DoubleSide}
           toneMapped={false}
         />
       </mesh>
@@ -186,6 +187,7 @@ function ClickableObject({ object, accent, isNearby }) {
       <Billboard position={[0, 1.1, 0]}>
         <Text
           fontSize={0.18}
+          font={handwritingFont}
           color="#f7edd0"
           anchorX="center"
           anchorY="middle"
@@ -199,6 +201,7 @@ function ClickableObject({ object, accent, isNearby }) {
         <Billboard position={[0, 1.42, 0]}>
           <Text
             fontSize={0.13}
+            font={handwritingFont}
             color="#d8bd81"
             anchorX="center"
             anchorY="middle"
@@ -215,24 +218,7 @@ function ClickableObject({ object, accent, isNearby }) {
 
 function ObjectMesh({ kind, color }) {
   if (kind === 'fire') {
-    return (
-      <group>
-        <mesh castShadow position={[-0.22, 0.05, 0]} rotation-z={Math.PI / 2}>
-          <cylinderGeometry args={[0.08, 0.08, 0.75, 8]} />
-          <meshStandardMaterial color="#3c2115" roughness={0.85} />
-        </mesh>
-        <mesh castShadow position={[0.22, 0.05, 0]} rotation-z={-Math.PI / 2}>
-          <cylinderGeometry args={[0.08, 0.08, 0.75, 8]} />
-          <meshStandardMaterial color="#3c2115" roughness={0.85} />
-        </mesh>
-        <Float speed={2.2} rotationIntensity={0.2} floatIntensity={0.22}>
-          <mesh position={[0, 0.45, 0]} castShadow>
-            <coneGeometry args={[0.38, 0.9, 18]} />
-            <meshStandardMaterial color="#ff8b2c" emissive="#ff6b19" emissiveIntensity={1.1} transparent opacity={0.82} />
-          </mesh>
-        </Float>
-      </group>
-    );
+    return <CampfireModel />;
   }
 
   if (kind === 'house') {
@@ -241,8 +227,8 @@ function ObjectMesh({ kind, color }) {
 
   if (kind === 'clerval') {
     return (
-      <Billboard position={[0, 0.82, 0]}>
-        <ShadowFigure image="/images/shadow-person-2.png" scale={1.15} opacity={0.86} />
+      <Billboard position={[0, 1, 0]}>
+        <ShadowFigure image="/images/shadow-person-2.png" scale={2} opacity={0.86} />
       </Billboard>
     );
   }
@@ -350,7 +336,7 @@ function ObjectMesh({ kind, color }) {
 }
 
 function PineTree({ position, scale, rotationY }) {
-  const { scene } = useGLTF('/models/pine_tree.glb');
+  const { scene } = useGLTF(assetPath('/models/pine_tree.glb'));
   const tree = useMemo(() => scene.clone(true), [scene]);
 
   useEffect(() => {
@@ -358,6 +344,10 @@ function PineTree({ position, scale, rotationY }) {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+        if (child.material) {
+          child.material.side = THREE.DoubleSide;
+          child.material.needsUpdate = true;
+        }
       }
     });
   }, [tree]);
@@ -373,7 +363,7 @@ function PineTree({ position, scale, rotationY }) {
 }
 
 function CottageModel({ color }) {
-  const { scene } = useGLTF('/models/CozyMedievalCottage.glb');
+  const { scene } = useGLTF(assetPath('/models/CozyMedievalCottage.glb'));
   const cottage = useMemo(() => scene.clone(true), [scene]);
 
   useEffect(() => {
@@ -393,30 +383,86 @@ function CottageModel({ color }) {
   );
 }
 
-function MedievalHouseModel({ color, scale = 0.004, rotationY = 0 }) {
-  const { scene } = useGLTF('/models/medieval_house.glb');
-  const house = useMemo(() => scene.clone(true), [scene]);
+const houseModelPaths = {
+  1: assetPath('/models/medieval_house_1.glb'),
+  3: assetPath('/models/medieval_house_3.glb')
+};
+
+function MedievalHouseModel({ color, scale = 0.24, rotationY = 0, variant }) {
+  const selectedVariant = useMemo(
+    () => variant || (Math.random() > 0.5 ? 1 : 3),
+    [variant]
+  );
+  const gltf = useGLTF(houseModelPaths[selectedVariant]);
+  const house = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  const [diffuseMap, setDiffuseMap] = useState(null);
+  const windowX = selectedVariant === 1 ? 0.33 : 0.18;
+
+  useEffect(() => {
+    let cancelled = false;
+    setDiffuseMap(null);
+
+    gltf.parser
+      ?.getDependency('texture', 0)
+      .then((texture) => {
+        if (cancelled) return;
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.flipY = false;
+        texture.needsUpdate = true;
+        setDiffuseMap(texture);
+      })
+      .catch(() => {
+        if (!cancelled) setDiffuseMap(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [gltf]);
 
   useEffect(() => {
     house.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+        if (diffuseMap) {
+          child.material = new THREE.MeshStandardMaterial({
+            map: diffuseMap,
+            roughness: 0.82,
+            metalness: 0,
+            side: THREE.DoubleSide
+          });
+        } else if (child.material) {
+          child.material.side = THREE.DoubleSide;
+          child.material.needsUpdate = true;
+        }
       }
     });
-  }, [house]);
+  }, [house, diffuseMap]);
 
   return (
-    <group scale={[scale, scale, scale]} rotation={[0, rotationY, 0]}>
-      <primitive object={house} />
-      <pointLight position={[0.35, 1.2, -0.45]} color={color} intensity={0.45} distance={2.2} />
+    <group rotation={[0, rotationY, 0]}>
+      <group scale={[scale, scale, scale]}>
+        <primitive object={house} />
+      </group>
+      <mesh position={[windowX, 1.15, -0.56]}>
+        <boxGeometry args={[0.46, 0.28, 0.035]} />
+        <meshStandardMaterial
+          color="#d7a05f"
+          emissive="#b94a22"
+          emissiveIntensity={0.72}
+          roughness={0.6}
+        />
+      </mesh>
+      <pointLight position={[windowX + 0.02, 1.24, -0.58]} color={color} intensity={1.15} distance={3.4} />
     </group>
   );
 }
 
 function OpenBookModel() {
-  const { scene } = useGLTF('/models/book_open.glb');
+  const { scene } = useGLTF(assetPath('/models/book_open.glb'));
   const book = useMemo(() => scene.clone(true), [scene]);
+  const randomRotation = useMemo(() => 1 + Math.random() * 1, []);
 
   useEffect(() => {
     book.traverse((child) => {
@@ -428,8 +474,29 @@ function OpenBookModel() {
   }, [book]);
 
   return (
-    <group position={[0, 0.18, 0]} rotation={[-Math.PI / 2, 0, 0.2]} scale={[0.026, 0.026, 0.026]}>
+    <group position={[0, 0.18, 0]} rotation={[0, randomRotation, 0]} scale={[0.026, 0.026, 0.026]}>
       <primitive object={book} />
+    </group>
+  );
+}
+
+function CampfireModel() {
+  const { scene } = useGLTF(assetPath('/models/campfire.glb'));
+  const campfire = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    campfire.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [campfire]);
+
+  return (
+    <group scale={[0.95, 0.95, 0.95]} rotation={[0, -0.35, 0]}>
+      <primitive object={campfire} />
+      <pointLight position={[0, 0.8, 0]} color="#ff8b2c" intensity={1.8} distance={4.5} />
     </group>
   );
 }
@@ -487,7 +554,8 @@ function VillageSet({ accent }) {
           <MedievalHouseModel
             color={accent}
             rotationY={(index % 2) * 0.35 + Math.PI}
-            scale={0.0034 + (index % 2) * 0.0003}
+            scale={index % 2 ? 0.22 : 0.28}
+            variant={index % 2 ? 3 : 1}
           />
         </group>
       ))}
@@ -557,13 +625,15 @@ function EnvironmentSet({ type, accent }) {
   return <ChamberSet accent={accent} />;
 }
 
-useGLTF.preload('/models/pine_tree.glb');
-useGLTF.preload('/models/CozyMedievalCottage.glb');
-useGLTF.preload('/models/medieval_house.glb');
-useGLTF.preload('/models/book_open.glb');
-useTexture.preload('/images/shadow-person-1.png');
-useTexture.preload('/images/shadow-person-2.png');
-useTexture.preload('/images/shadow-person-3.png');
+useGLTF.preload(assetPath('/models/pine_tree.glb'));
+useGLTF.preload(assetPath('/models/CozyMedievalCottage.glb'));
+useGLTF.preload(assetPath('/models/medieval_house_1.glb'));
+useGLTF.preload(assetPath('/models/medieval_house_3.glb'));
+useGLTF.preload(assetPath('/models/book_open.glb'));
+useGLTF.preload(assetPath('/models/campfire.glb'));
+useTexture.preload(assetPath('/images/shadow-person-1.png'));
+useTexture.preload(assetPath('/images/shadow-person-2.png'));
+useTexture.preload(assetPath('/images/shadow-person-3.png'));
 
 function SceneWorld({
   scene,
@@ -572,18 +642,28 @@ function SceneWorld({
   humanity,
   onShadowGaze
 }) {
-  const { environment, objects, shadowPeople = [] } = scene;
+  const { environment, objects, shadowPeople = [], backdropHouses = [] } = scene;
 
   return (
     <>
       <color attach="background" args={[environment.fog]} />
       <fog attach="fog" args={[environment.fog, 6, 19]} />
-      <ambientLight intensity={0.45} />
+      <ambientLight intensity={environment.ambientIntensity ?? 0.45} />
       <directionalLight position={[4, 8, 3]} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
       <pointLight position={[-3, 2.5, -2]} color={environment.accent} intensity={1.6} distance={8} />
       <Stars radius={45} depth={18} count={900} factor={2.4} fade speed={0.5} />
       <Ground color={environment.color} />
       <EnvironmentSet type={environment.type} accent={environment.accent} />
+      {backdropHouses.map((house) => (
+        <group key={house.id} position={house.position}>
+          <MedievalHouseModel
+            color={environment.accent}
+            rotationY={house.rotationY}
+            scale={house.scale}
+            variant={house.variant}
+          />
+        </group>
+      ))}
       {objects?.map((object) => (
         <ClickableObject
           key={object.id}
