@@ -95,7 +95,6 @@ export default function App() {
     return Boolean(completedScripts[key]);
   });
   const isLastScene = currentSceneIndex === scenes.length - 1;
-  const healthDepleted = stats.health <= 0;
   const humanityRatio = stats.humanity / 100;
   const worldBrightness = 0.62 + humanityRatio * 0.55;
   const vignetteStrength = 0.76 - humanityRatio * 0.52;
@@ -325,7 +324,6 @@ export default function App() {
               selectedChoices={selectedChoices}
               sceneComplete={sceneComplete}
               isLastScene={isLastScene}
-              healthDepleted={healthDepleted}
               onChoose={handleChoice}
               onContinue={handleContinue}
               onRestart={handleRestart}

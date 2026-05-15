@@ -23,14 +23,12 @@ export default function ChoicePanel({
   selectedChoices,
   sceneComplete,
   isLastScene,
-  healthDepleted,
   onChoose,
   onContinue,
   onRestart
 }) {
   const choices = interaction.choices || [];
   const alreadyResponded = selectedChoices.size > 0;
-  const finalChoiceLocked = isLastScene && healthDepleted && !alreadyResponded;
 
   return (
     <section className="choicePanel" aria-label="Choices">
@@ -39,13 +37,7 @@ export default function ChoicePanel({
         <span>{selectedChoices.size}/{choices.length}</span>
       </div>
 
-      {finalChoiceLocked && (
-        <p className="emptyText interactionHint">
-          Your health is gone before the last act. The ocean keeps the answer.
-        </p>
-      )}
-
-      {choices.length > 0 && !finalChoiceLocked && (
+      {choices.length > 0 && (
         <div className="choiceList">
           {choices.map((choice) => {
             const chosen = selectedChoices.has(choice.id);
@@ -86,7 +78,7 @@ export default function ChoicePanel({
         </button>
       )}
 
-      {(sceneComplete || finalChoiceLocked) && isLastScene && (
+      {sceneComplete && isLastScene && (
         <div className="endingPanel">
           <p>
             The story ends at the ice. Whether mercy survives depends on what humanity
