@@ -98,27 +98,33 @@ function ProximityTracker({ objects, onNearbyObjectChange }) {
 }
 
 function ShadowPerson({ person }) {
-  const texture = useTexture(person.image);
-
   return (
     <Billboard position={person.position}>
-      <group scale={person.scale}>
-        <mesh position={[0, 0, -0.015]}>
-          <planeGeometry args={[0.86, 1.45]} />
-          <meshBasicMaterial color="#524653" transparent opacity={0.18} depthWrite={false} />
-        </mesh>
-        <mesh>
-          <planeGeometry args={[0.78, 1.38]} />
-          <meshBasicMaterial
-            map={texture}
-            transparent
-            opacity={0.72}
-            depthWrite={false}
-            toneMapped={false}
-          />
-        </mesh>
-      </group>
+      <ShadowFigure image={person.image} scale={person.scale} opacity={0.72} />
     </Billboard>
+  );
+}
+
+function ShadowFigure({ image, scale = 1, opacity = 0.72 }) {
+  const texture = useTexture(image);
+
+  return (
+    <group scale={scale}>
+      <mesh position={[0, 0, -0.015]}>
+        <planeGeometry args={[0.86, 1.45]} />
+        <meshBasicMaterial color="#524653" transparent opacity={0.18} depthWrite={false} />
+      </mesh>
+      <mesh>
+        <planeGeometry args={[0.78, 1.38]} />
+        <meshBasicMaterial
+          map={texture}
+          transparent
+          opacity={opacity}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -235,16 +241,9 @@ function ObjectMesh({ kind, color }) {
 
   if (kind === 'clerval') {
     return (
-      <group>
-        <mesh castShadow position={[0, 0.45, 0]}>
-          <capsuleGeometry args={[0.24, 0.85, 8, 16]} />
-          <meshStandardMaterial color="#2b2f3b" roughness={0.8} />
-        </mesh>
-        <mesh castShadow position={[0, 1.16, 0]}>
-          <sphereGeometry args={[0.23, 18, 18]} />
-          <meshStandardMaterial color="#d6b28b" roughness={0.7} />
-        </mesh>
-      </group>
+      <Billboard position={[0, 0.82, 0]}>
+        <ShadowFigure image="/images/shadow-person-2.png" scale={1.15} opacity={0.86} />
+      </Billboard>
     );
   }
 
@@ -273,12 +272,7 @@ function ObjectMesh({ kind, color }) {
   }
 
   if (kind === 'book') {
-    return (
-      <mesh castShadow rotation={[0.15, 0.4, 0]}>
-        <boxGeometry args={[0.75, 0.14, 0.5]} />
-        <meshStandardMaterial color={color} roughness={0.55} />
-      </mesh>
-    );
+    return <OpenBookModel />;
   }
 
   if (kind === 'hourglass') {
@@ -399,6 +393,47 @@ function CottageModel({ color }) {
   );
 }
 
+function MedievalHouseModel({ color, scale = 0.004, rotationY = 0 }) {
+  const { scene } = useGLTF('/models/medieval_house.glb');
+  const house = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    house.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [house]);
+
+  return (
+    <group scale={[scale, scale, scale]} rotation={[0, rotationY, 0]}>
+      <primitive object={house} />
+      <pointLight position={[0.35, 1.2, -0.45]} color={color} intensity={0.45} distance={2.2} />
+    </group>
+  );
+}
+
+function OpenBookModel() {
+  const { scene } = useGLTF('/models/book_open.glb');
+  const book = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    book.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [book]);
+
+  return (
+    <group position={[0, 0.18, 0]} rotation={[-Math.PI / 2, 0, 0.2]} scale={[0.026, 0.026, 0.026]}>
+      <primitive object={book} />
+    </group>
+  );
+}
+
 function ForestSet() {
   return (
     <group>
@@ -448,15 +483,12 @@ function VillageSet({ accent }) {
         [-3.2, 0, 3.2],
         [4, 0, 2.7]
       ].map((position, index) => (
-        <group key={index} position={position} rotation-y={(index % 2) * 0.35}>
-          <mesh castShadow position={[0, 0.55, 0]}>
-            <boxGeometry args={[1.7, 1.1, 1.35]} />
-            <meshStandardMaterial color="#3a2b25" roughness={0.9} />
-          </mesh>
-          <mesh castShadow position={[0, 1.35, 0]} rotation-z={Math.PI / 4}>
-            <boxGeometry args={[1.55, 1.55, 1.45]} />
-            <meshStandardMaterial color={index === 1 ? accent : '#1d1715'} roughness={0.95} />
-          </mesh>
+        <group key={index} position={position}>
+          <MedievalHouseModel
+            color={accent}
+            rotationY={(index % 2) * 0.35 + Math.PI}
+            scale={0.0034 + (index % 2) * 0.0003}
+          />
         </group>
       ))}
     </group>
@@ -527,6 +559,8 @@ function EnvironmentSet({ type, accent }) {
 
 useGLTF.preload('/models/pine_tree.glb');
 useGLTF.preload('/models/CozyMedievalCottage.glb');
+useGLTF.preload('/models/medieval_house.glb');
+useGLTF.preload('/models/book_open.glb');
 useTexture.preload('/images/shadow-person-1.png');
 useTexture.preload('/images/shadow-person-2.png');
 useTexture.preload('/images/shadow-person-3.png');

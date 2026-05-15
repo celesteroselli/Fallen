@@ -1,8 +1,8 @@
-// The story follows a fixed Frankenstein-inspired sequence.
 // Add scenes by appending to this array. Add object conversations with:
 // script: [{ speaker, role, text }], choices: [{ text, effects }]
 // Effects change state only; they never choose the next scene.
 // Effect values may be numbers or functions that receive current stats.
+
 export const scenes = [
   {
     id: 'new-world',
@@ -32,12 +32,12 @@ export const scenes = [
           {
             speaker: 'Inner Voice',
             role: 'inner',
-            text: 'Warmth. Pain. Light. The flame bites, yet I cannot look away from it.'
+            text: 'One day, when I was oppressed by cold, I found a fire which had been left by some wandering beggars, and was overcome with delight at the warmth I had experienced from it (75).'
           },
           {
             speaker: 'Inner Voice',
             role: 'inner',
-            text: 'I have entered a world that wounds me before it names me.'
+            text: 'In my joy, I thrust my hand into the live embers, but quickly drew it out again with a cry of pain. How strange, I thought, that the same cause should produce such opposite effects (75)!'
           }
         ],
         choices: []
@@ -46,15 +46,15 @@ export const scenes = [
   },
   {
     id: 'delacey-forest',
-    title: 'The Forest: The De Laceys',
+    title: 'The Forest',
     environment: {
       type: 'village',
       color: '#211b16',
       fog: '#100d0b',
-      accent: '#d7ad6d',
+      accent: '#1d4827ff',
       theme: 'hidden cottage'
     },
-    objectives: ['Listen at the cottage', 'Decide what the books make of you'],
+    objectives: ['Listen at the cottage', 'Look at the books'],
     objects: [
       {
         id: 'delacey-house',
@@ -65,24 +65,19 @@ export const scenes = [
         speaker: 'The Cottage',
         script: [
           {
-            speaker: 'Agatha',
-            role: 'partner',
-            text: 'Father, the wood is nearly gone. The cold will settle before morning.'
+            speaker: 'Creature',
+            role: 'player',
+            text: 'What chiefly struck me was the gentle manners of these people; and I longed to join them, but dared not (80).'
           },
           {
             speaker: 'Creature',
             role: 'player',
-            text: 'I can carry what they need. I can be useful, even if they never see me.'
-          },
-          {
-            speaker: 'Felix',
-            role: 'partner',
-            text: 'Someone has been helping us. I do not know whether to bless the kindness or fear the hand that leaves it.'
+            text: 'I discovered also another means through which I was enabled to assist their labours. I found that the youth spent a great part of each day in collecting wood for the family fire, and during the night I often took his tools, the use of which I quickly discovered, and brought home firing sufficient for the consumption of several days (81).'
           },
           {
             speaker: 'Creature',
             role: 'player',
-            text: 'Their voices teach me tenderness, and tenderness teaches me shame.'
+            text: 'I afterwards found that these labours, performed by an invisible hand, greatly astonished them; and once or twice I heard them, on these occasions, utter the words good spirit, wonderful; but I did not then understand the significance of these terms (83)'
           }
         ],
         choices: [
@@ -118,7 +113,7 @@ export const scenes = [
           {
             speaker: 'Creature',
             role: 'player',
-            text: 'A first man, a fallen angel, a creator who turns away. Which of them am I meant to be?'
+            text: 'It moved every feeling of wonder and aw3, that the picture of an omnipotent God warring with his creatures was capable of exciting... Like Adam, I was created apparently united by no link to any other being in existence (94).'
           }
         ],
         choices: [
@@ -150,7 +145,7 @@ export const scenes = [
           {
             speaker: 'Creature',
             role: 'player',
-            text: 'Here is a heart that suffers because it can love. I understand too much of him.'
+            text: '...besides the interest of its simple and affecting story, so many opinions are canvassed, and so many lights thrown upon what had hitherto been to me obscure subjects, that I found in it a never-ending source of speculation and astonishment (93).'
           }
         ],
         choices: [
@@ -182,7 +177,7 @@ export const scenes = [
           {
             speaker: 'Creature',
             role: 'player',
-            text: 'These noble lives speak of duty and glory. If virtue is learned, perhaps I am not lost.'
+            text: 'This book had a far different effect upon me from the Sorrows of Werter... Plutarch taught me high thoughts; he elevated me above the wretched sphere of my own reflections, to admire and love the heroes of past ages (94).'
           }
         ],
         choices: [
@@ -192,7 +187,7 @@ export const scenes = [
             effects: {
               humanity: 2,
               flags: { readPlutarch: true },
-              objectivesComplete: ['Decide what the books make of you']
+              objectivesComplete: ['Look at the books']
             }
           },
           {
@@ -200,7 +195,7 @@ export const scenes = [
             text: 'Do not read it',
             effects: {
               flags: { refusedPlutarch: true },
-              objectivesComplete: ['Decide what the books make of you']
+              objectivesComplete: ['Look at the books']
             }
           }
         ]
@@ -231,27 +226,27 @@ export const scenes = [
         {
           speaker: 'Victor',
           role: 'partner',
-          text: 'Begone. Do not force me to look upon what my own hands made.'
+          text: 'Devil, do you dare approach me? And do not you fear the fierce vengeance of my arm wreaked on your miserable head? (72).'
         },
         {
           speaker: 'Creature',
           role: 'player',
-          text: 'You gave me life, then abandoned me to hunger, cold, and the hatred of every face.'
+          text: 'Everywhere I see bliss, from which I alone am irrevocably excluded. I was benevolent and good; misery made me a fiend. Make me happy, and I shall again be virtuous (72).'
         },
         {
           speaker: 'Victor',
           role: 'partner',
-          text: 'Your misery is terrible, but your crimes are more terrible still.'
+          text: 'Begone, vile insect! Or rather, stay, that I may trample you to dust! (72).'
         },
         {
           speaker: 'Creature',
           role: 'player',
-          text: 'Make me not a monster in solitude. Give me one being who will not recoil.'
+          text: 'All men hate the wretched; how, then, must I be hated, who am miserable beyond all living things! Yet you, my creator, detest and spurn me, thy creature, to whom thou art bound by ties only dissoluble by the annihilation of one of us. You purpose to kill me. How dare you sport thus with life? (72).'
         },
         {
           speaker: 'Victor',
           role: 'partner',
-          text: 'Your plea has found the man in me, though fear still grips the maker.'
+          text: 'Abhorred monster! Fiend that thou art! The tortures of hell are too mild a vengeance for thy crimes. Wretched devil! You reproach me with your creation, come on, then, that I may extinguish the spark which I so negligently bestowed (72).'
         }
       ],
       choices: []
@@ -268,7 +263,7 @@ export const scenes = [
       accent: '#c46b58',
       theme: 'human shadows'
     },
-    objectives: ['Endure the town', 'Decide Clerval’s fate'],
+    objectives: ['Endure the town', 'Meet Clerval'],
     sceneStartEffects: {
       health: ({ humanity }) => -Math.ceil(humanity / 4),
       flags: { enteredTown: true }
@@ -311,23 +306,18 @@ export const scenes = [
           {
             speaker: 'Clerval',
             role: 'partner',
-            text: 'Who is there? I heard a step behind me.'
+            text: 'Who is there?'
           },
           {
             speaker: 'Creature',
             role: 'player',
-            text: 'He has Victor’s love. He has the human tenderness denied to me.'
-          },
-          {
-            speaker: 'Clerval',
-            role: 'partner',
-            text: 'Show yourself, friend, and I will help if help is needed.'
+            text: 'For a long time, I could not conceive how one man could go forth to murder his fellow, or even why there were laws and governments (87).'
           },
           {
             speaker: 'Creature',
             role: 'player',
-            text: 'A friend. The word comes too late, and still it wounds.'
-          }
+            text: 'My rage was without bounds; I sprang on him, impelled by all the feelings which can arm one being against the existence of another (72).'
+          },
         ],
         choices: [
           {
@@ -337,7 +327,7 @@ export const scenes = [
               humanity: -10,
               health: 3,
               flags: { murderedClerval: true },
-              objectivesComplete: ['Endure the town', 'Decide Clerval’s fate']
+              objectivesComplete: ['Endure the town', 'Meet Clerval']
             }
           },
           {
@@ -347,7 +337,7 @@ export const scenes = [
               humanity: 3,
               health: -2,
               flags: { sparedClerval: true },
-              objectivesComplete: ['Endure the town', 'Decide Clerval’s fate']
+              objectivesComplete: ['Endure the town', 'Meet Clerval']
             }
           }
         ]
@@ -379,22 +369,22 @@ export const scenes = [
         {
           speaker: 'Creature',
           role: 'player',
-          text: 'There he lies. My maker, my enemy, my last witness.'
+          text: 'But it is even so; the fallen angel becomes a malignant devil. Yet even that enemy of God and man had friends and associates in his desolation; I am quite alone (166).'
         },
         {
           speaker: 'Walton',
           role: 'partner',
-          text: 'If grief can live in such a form, then I have misjudged the boundaries of the human heart.'
+          text: 'He was soon borne away by tge waves, and lost in darkness and distance (168).'
         },
         {
           speaker: 'Creature',
           role: 'player',
-          text: 'I wanted his suffering, and now his silence is heavier than revenge.'
+          text: 'He is dead who called me into being; and when I shall be no more, the very remembrance of us both will speedily vanish (167).'
         },
         {
           speaker: 'Creature',
           role: 'player',
-          text: 'If there is mercy left in me, it must be spent upon the world I have harmed.'
+          text: 'Polluted by crimes, and torn by the bitterest remorse, where can I find rest but in death? (167). But... '
         }
       ],
       choices: [
