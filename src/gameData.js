@@ -373,7 +373,7 @@ export const scenes = [
             text: 'Do not murder Clerval',
             effects: {
               humanity: 15,
-              health: -5,
+              health: 0,
               flags: { sparedClerval: true },
               objectivesComplete: ['Endure the town', 'Meet Clerval']
             }
